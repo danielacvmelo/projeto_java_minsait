@@ -18,18 +18,18 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tb_estoque")
-public class Estoque {
+@Table(name = "tb_stock")
+public class Stock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Integer quantidade;
+    private Integer quantity;
 
     @OneToOne
-    @JoinColumn(name = "produto_id", referencedColumnName = "id")
-    private Produtos produto;
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private Product product;
 
 }
