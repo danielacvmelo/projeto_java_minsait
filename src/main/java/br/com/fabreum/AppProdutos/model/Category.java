@@ -29,5 +29,5 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
     @OneToMany(mappedBy = "category")
-    private Set<Produtos> produtos = new HashSet<>();
+    private Set<Product> produtos = new HashSet<>();
 }
