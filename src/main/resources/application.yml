@@ -12,3 +12,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/appprodutos_db
     username: postgres
     password: admin
+
+appprodutos:
+  security:
+    secret: "senha-secreta-muito-secreta-bastante-secreta"
