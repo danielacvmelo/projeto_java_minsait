@@ -12,13 +12,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity // anotacao para habilitar a configuracao de login e senha
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // private final SecurityFilter securityFilter;
+    private final SecurityFilter securityFilter;
 
     @Bean // anotacao p/ o spring gerenciar
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -27,11 +28,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // PUBLICO
                         .requestMatchers(HttpMethod.POST, "/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
+                        // ADMIN -> pode `tudo`
+//                        .requestMatchers(HttpMethod.POST, "/v1/products/**").hasRole("ADMIN")
+//                        .requestMatchers(HttpMethod.PUT, "/v1/products/**").hasRole("ADMIN")
+//                        .requestMatchers(HttpMethod.DELETE, "/v1/products/**").hasRole("ADMIN")
+                        // USER
+                        // ler produtos
+                        //.requestMatchers(HttpMethod.GET, "/v1/products/**").hasAnyRole("USER", "ADMIN", "SELLER")
+                        //carrinho → restrito ao USER
+                        // .requestMatchers("/v1/cart/**").hasRole("USER")
+
+                        // SELLER
+
+                        //fechar o filter
                         .anyRequest().authenticated() //qualquer outra chamada precisa ser autenticada
                 )
-                // .addFilter()
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

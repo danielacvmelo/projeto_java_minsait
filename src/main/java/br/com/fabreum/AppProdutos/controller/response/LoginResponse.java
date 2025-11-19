@@ -1,4 +1,6 @@
 package br.com.fabreum.AppProdutos.controller.response;
 
-public record LoginResponse(String token) {
+import br.com.fabreum.AppProdutos.enums.Role;
+
+public record LoginResponse(Long id, String name, String email, Role role, String token) {
 }
