@@ -22,6 +22,7 @@ public class TokenService {
     public String generateToken(User user) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
+        //criacao do token
         return JWT.create()
                 .withSubject(user.getEmail())
                 .withClaim("userId", user.getId()) //id
@@ -33,7 +34,7 @@ public class TokenService {
                 .withIssuer("AppProdutos") //quem gerou o token
                 .sign(algorithm);
     }
-
+    //verificacao do token
     public Optional<JWTUserData> verifyToken(String token) {
         //usar o try catch para evitar bug
         try {

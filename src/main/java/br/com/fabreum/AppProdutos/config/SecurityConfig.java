@@ -1,5 +1,6 @@
 package br.com.fabreum.AppProdutos.config;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         // PUBLICO
                         .requestMatchers(HttpMethod.POST, "/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
@@ -40,9 +42,7 @@ public class SecurityConfig {
                         //.requestMatchers(HttpMethod.GET, "/v1/products/**").hasAnyRole("USER", "ADMIN", "SELLER")
                         //carrinho → restrito ao USER
                         // .requestMatchers("/v1/cart/**").hasRole("USER")
-
                         // SELLER
-
                         //fechar o filter
                         .anyRequest().authenticated() //qualquer outra chamada precisa ser autenticada
                 )
