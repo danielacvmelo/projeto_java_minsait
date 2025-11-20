@@ -62,5 +62,26 @@ public class TokenService {
 
     }
 
+    // METODO PARA EXTRAIR DADOS DO TOKEN P/ endpoint /auth/refresh
+    public String refreshToken(String oldToken) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+
+        DecodedJWT decoded = JWT.require(algorithm)
+                .build()
+                .verify(oldToken);
+
+        return JWT.create()
+                .withSubject(decoded.getSubject()) // email
+                .withClaim("userId", decoded.getClaim("userId").asLong())
+                .withClaim("name", decoded.getClaim("name").asString())
+                .withClaim("email", decoded.getClaim("email").asString())
+                .withClaim("role", decoded.getClaim("role").asString())
+                .withIssuedAt(Instant.now())
+                .withExpiresAt(Instant.now().plusSeconds(86400))
+                .withIssuer("AppProdutos")
+                .sign(algorithm);
+    }
+
+
 
 }
