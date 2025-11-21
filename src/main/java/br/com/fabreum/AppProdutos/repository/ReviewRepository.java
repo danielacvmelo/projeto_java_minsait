@@ -25,5 +25,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // conta quantas reviews um produto tem com uma classificação específica
     @Query("SELECT COUNT(r) FROM Review r WHERE r.product.id = :productId AND r.rating = :rating")
-    long CountByProductIdAndRating(@Param("productId") Long productId, @Param("rating") Integer rating);
+    long countProductByIdAndRating(@Param("productId") Long productId, @Param("rating") Integer rating);
 }
