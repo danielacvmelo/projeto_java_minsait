@@ -1,5 +1,6 @@
 package br.com.fabreum.AppProdutos.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,5 +30,6 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private Set<Product> produtos = new HashSet<>();
 }
