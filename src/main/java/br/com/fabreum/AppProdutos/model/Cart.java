@@ -26,6 +26,13 @@ public class Cart {
     @Column(name = "total_price")
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
+    @ManyToOne
+    @JoinColumn(name = "applied_promotion_id")
+    private Promotion appliedPromotion;
+
+    @Column(name = "discount_value")
+    private BigDecimal discountValue = BigDecimal.ZERO;
+
     public void addItem(CartItem item) {
         items.add(item);
         item.setCart(this);
@@ -39,10 +46,14 @@ public class Cart {
     }
 
     public void recalculateTotalPrice() {
-        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal subtotal = BigDecimal.ZERO;
         for (CartItem item : items) {
-            total = total.add(item.getProduct().getPrice().multiply(new BigDecimal(item.getQuantity())));
+            subtotal = subtotal.add(item.getProduct().getPrice().multiply(new BigDecimal(item.getQuantity())));
         }
-        this.totalPrice = total;
+        if (this.discountValue != null) {
+            this.totalPrice = subtotal.subtract(this.discountValue).max(BigDecimal.ZERO);
+        } else {
+            this.totalPrice = subtotal;
+        }
     }
 }
