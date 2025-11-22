@@ -1,3 +1,4 @@
+
 package br.com.fabreum.AppProdutos.model;
 
 import br.com.fabreum.AppProdutos.enums.Role;

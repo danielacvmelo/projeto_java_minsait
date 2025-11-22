@@ -2,9 +2,15 @@ spring:
   application:
     name: AppProdutos
 
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
 

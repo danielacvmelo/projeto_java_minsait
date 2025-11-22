@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import br.com.fabreum.AppProdutos.model.User;
 
 import java.time.Instant;
-import java.util.Date;
 
 
 @Component
