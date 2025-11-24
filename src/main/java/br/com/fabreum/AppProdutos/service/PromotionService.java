@@ -18,7 +18,6 @@ import java.math.RoundingMode;
 @Service
 @RequiredArgsConstructor
 public class PromotionService {
-
     private final PromotionRepository promotionRepository;
     private final CartRepository cartRepository;
     private final CouponUsageRepository couponUsageRepository;
@@ -32,34 +31,17 @@ public class PromotionService {
 
     @Transactional
     public Cart applyCoupon(Long cartId, String code) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+        Cart cart = findCartById(cartId);
+        Promotion promotion = findPromotionByCode(code);
 
-        Promotion promotion = promotionRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("Cupom inválido"));
+        validatePromotionIsActive(promotion);
 
-        // Validações gerais
-        if (!promotion.isValid()) {
-            throw new RuntimeException("Cupom expirado ou esgotado");
-        }
+        User currentUser = getCurrentAuthenticatedUser();
+        validateCouponNotUsedByUser(currentUser, promotion);
 
-        // Validação de uso por usuário
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = (User) userRepository.findUserByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        if (couponUsageRepository.existsByUserIdAndPromotionId(user.getId(), promotion.getId())) {
-            throw new RuntimeException("Você já utilizou este cupom");
-        }
-
-        // Validação de escopo
         BigDecimal applicableAmount = calculateApplicableAmount(cart, promotion);
+        validateCouponApplicableToCart(applicableAmount);
 
-        if (applicableAmount.compareTo(BigDecimal.ZERO) == 0) {
-            throw new RuntimeException("Este cupom não se aplica aos produtos do seu carrinho");
-        }
-
-        // Calcular desconto
         BigDecimal discount = calculateDiscount(promotion, applicableAmount, cart.getTotalPrice());
 
         cart.setAppliedPromotion(promotion);
@@ -69,43 +51,91 @@ public class PromotionService {
         return cartRepository.save(cart);
     }
 
+    private Cart findCartById(Long cartId) {
+        return cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado"));
+    }
+
+    private Promotion findPromotionByCode(String code) {
+        return promotionRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Cupom inválido"));
+    }
+
+    private void validatePromotionIsActive(Promotion promotion) {
+        if (!promotion.isValid()) {
+            throw new RuntimeException("Cupom expirado ou esgotado");
+        }
+    }
+
+    private User getCurrentAuthenticatedUser() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return (User) userRepository.findUserByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    }
+
+    private void validateCouponNotUsedByUser(User user, Promotion promotion) {
+        if (couponUsageRepository.existsByUserIdAndPromotionId(user.getId(), promotion.getId())) {
+            throw new RuntimeException("Você já utilizou este cupom");
+        }
+    }
+
+    private void validateCouponApplicableToCart(BigDecimal applicableAmount) {
+        if (applicableAmount.compareTo(BigDecimal.ZERO) == 0) {
+            throw new RuntimeException("Este cupom não se aplica aos produtos do seu carrinho");
+        }
+    }
+
     private BigDecimal calculateDiscount(Promotion promotion, BigDecimal applicableAmount, BigDecimal cartTotal) {
-        BigDecimal discount;
+        BigDecimal calculatedDiscount;
 
         if (promotion.getType() == PromotionType.PERCENTAGE) {
-            discount = applicableAmount.multiply(promotion.getValue())
+            calculatedDiscount = applicableAmount.multiply(promotion.getValue())
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         } else {
-            discount = promotion.getValue();
+            calculatedDiscount = promotion.getValue();
         }
 
-        // Garante que o desconto não seja maior que o total do carrinho
-        if (discount.compareTo(cartTotal) > 0) {
-            return cartTotal;
-        }
-        return discount;
+        return calculatedDiscount.min(cartTotal);
     }
 
     private BigDecimal calculateApplicableAmount(Cart cart, Promotion promotion) {
         if (promotion.getScope() == PromotionScope.GLOBAL) {
-            return cart.getItems().stream()
-                    .map(item -> item.getProduct().getPrice().multiply(new BigDecimal(item.getQuantity())))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            return calculateGlobalApplicableAmount(cart);
         }
 
+        return calculateTargetedApplicableAmount(cart, promotion);
+    }
+
+    private BigDecimal calculateGlobalApplicableAmount(Cart cart) {
+        return cart.getItems().stream()
+                .map(this::calculateItemSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calculateTargetedApplicableAmount(Cart cart, Promotion promotion) {
         BigDecimal total = BigDecimal.ZERO;
-        for (CartItem item : cart.getItems()) {
-            boolean isApplicable = false;
-            if (promotion.getScope() == PromotionScope.PRODUCT) {
-                isApplicable = item.getProduct().getId().equals(promotion.getTargetId());
-            } else if (promotion.getScope() == PromotionScope.CATEGORY) {
-                isApplicable = item.getProduct().getCategory().getId().equals(promotion.getTargetId());
-            }
 
-            if (isApplicable) {
-                total = total.add(item.getProduct().getPrice().multiply(new BigDecimal(item.getQuantity())));
+        for (CartItem item : cart.getItems()) {
+            if (isItemApplicableForPromotion(item, promotion)) {
+                total = total.add(calculateItemSubtotal(item));
             }
         }
+
         return total;
+    }
+
+    private boolean isItemApplicableForPromotion(CartItem item, Promotion promotion) {
+        if (promotion.getScope() == PromotionScope.PRODUCT) {
+            return item.getProduct().getId().equals(promotion.getTargetId());
+        } else if (promotion.getScope() == PromotionScope.CATEGORY) {
+            return item.getProduct().getCategory().getId().equals(promotion.getTargetId());
+        }
+        return false;
+    }
+
+    private BigDecimal calculateItemSubtotal(CartItem item) {
+        BigDecimal price = item.getProduct().getPrice();
+        BigDecimal quantity = new BigDecimal(item.getQuantity());
+        return price.multiply(quantity);
     }
 }
