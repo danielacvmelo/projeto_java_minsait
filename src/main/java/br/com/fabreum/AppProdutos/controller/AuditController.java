@@ -2,7 +2,8 @@ package br.com.fabreum.AppProdutos.controller;
 
 import br.com.fabreum.AppProdutos.model.AuditLog;
 import br.com.fabreum.AppProdutos.repository.AuditLogRepository;
-import br.com.fabreum.AppProdutos.service.dto.AuditLogLogResponseDto;
+// import br.com.fabreum.AppProdutos.service.dto.AuditLogLogResponseDto;
+import br.com.fabreum.AppProdutos.service.dto.AuditLogResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,15 +36,15 @@ public class AuditController {
 
         // converte a lista de entidades para dtos de resposta
         List<AuditLogResponseDto> response = auditLogs.stream()
-                .map(this::convertToDto)
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
     }
 
     // metodo pra converter entidade AuditLog em Dto de resposta
-    private AuditLogResponseDTO convertToDTO(AuditLog auditLog) {
-        AuditLogResponseDTO dto = new AuditLogResponseDTO();
+    private AuditLogResponseDto convertToDTO(AuditLog auditLog) {
+        AuditLogResponseDto dto = new AuditLogResponseDto();
         dto.setId(auditLog.getId());
         dto.setEntityType(auditLog.getEntityType());
         dto.setEntityId(auditLog.getEntityId());

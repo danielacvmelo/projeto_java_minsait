@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long>{
     // busca logs por tipo de entidade
-    List<AudiLog> findByEntityTypeOrderByCreatedAtDesc(String EntityType);
+    List<AuditLog> findByEntityTypeOrderByCreatedAtDesc(String EntityType);
 
     // busca logs por tipo de entidade e id específico
     List<AuditLog> findByEntityTypeAndEntityIdOrderByCreatedAtDesc(String entityType, Long entityId);
