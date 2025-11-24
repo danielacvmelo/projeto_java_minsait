@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity // anotacao para habilitar a configuracao de login e senha
+@EnableMethodSecurity(prePostEnabled = true) // necessário para @PreAuthorize
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -24,7 +26,7 @@ public class SecurityConfig {
 
     @Bean // anotacao p/ o spring gerenciar
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // portas abertas para register; login
+        // lembrar: portas abertas para register e login;
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -33,6 +35,9 @@ public class SecurityConfig {
                         // PUBLICO
                         .requestMatchers(HttpMethod.POST, "/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/auth/refresh").permitAll()
+                        //QUALQUER USUARIO LOGADO
+                        .requestMatchers(HttpMethod.GET, "/v1/auth/me").authenticated()
                         // ADMIN -> pode `tudo`
 //                        .requestMatchers(HttpMethod.POST, "/v1/products/**").hasRole("ADMIN")
 //                        .requestMatchers(HttpMethod.PUT, "/v1/products/**").hasRole("ADMIN")
@@ -43,7 +48,7 @@ public class SecurityConfig {
                         //carrinho → restrito ao USER
                         // .requestMatchers("/v1/cart/**").hasRole("USER")
                         // SELLER
-                        //fechar o filter
+                        //
                         .anyRequest().authenticated() //qualquer outra chamada precisa ser autenticada
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
