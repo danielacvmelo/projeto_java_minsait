@@ -5,6 +5,7 @@ import br.com.fabreum.AppProdutos.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 record StockRequest(Integer quantity) {}
@@ -17,6 +18,7 @@ public class StockController {
     private final StockService stockService;
 
     @GetMapping("/{productId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Stock> getStock(@PathVariable Long productId) {
         return stockService.getStockByProductId(productId)
                 .map(stock -> ResponseEntity.ok(stock))
@@ -24,6 +26,8 @@ public class StockController {
     }
 
     @PostMapping("/{productId}/add")
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
     public ResponseEntity<?> addStock(@PathVariable Long productId, @RequestBody StockRequest request) {
         try {
             Stock updatedStock = stockService.addStock(productId, request.quantity());
@@ -34,6 +38,8 @@ public class StockController {
     }
 
     @PostMapping("/{productId}/remove")
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
     public ResponseEntity<?> removeStock(@PathVariable Long productId, @RequestBody StockRequest request) {
         try {
             Stock updatedStock = stockService.removeStock(productId, request.quantity());

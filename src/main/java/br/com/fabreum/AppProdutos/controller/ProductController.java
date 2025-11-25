@@ -6,6 +6,7 @@ import br.com.fabreum.AppProdutos.service.ProductService;
 import br.com.fabreum.AppProdutos.service.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,18 +29,22 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("product")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         Product saved = productRepository.save(product);
         return ResponseEntity.ok(saved);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<Product>> listProducts() {
         List<Product> products = productRepository.findAll();
         return ResponseEntity.ok(products);
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Product> listProductById(@PathVariable Long id) {
         Product product = productRepository.findById(id).orElseThrow();
         return ResponseEntity.ok(product);
@@ -51,6 +56,7 @@ public class ProductController {
      * @return
      */
     @GetMapping("/dto/{id}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ProductDto> listProductDtoById(@PathVariable Long id) {
         ProductDto productDto = productRepository.findByIdDto(id);
 
@@ -64,12 +70,15 @@ public class ProductController {
     }
 
     @PutMapping("update")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Optional<Product>> updateProduct(@RequestBody Product product) {
         final var existingProduct = productService.updateProduct(product);
         return ResponseEntity.ok(existingProduct);
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         //Exemplo construindo Record
         final var p = new ProductDto(1L, "dfs", "sdfa", new BigDecimal("25.6"));

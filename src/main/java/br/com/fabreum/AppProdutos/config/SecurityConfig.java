@@ -31,25 +31,33 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // PERMITE TRATAMENTO DE ERROS
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        // PUBLICO
+                        // ROTAS PUBLICAS
                         .requestMatchers(HttpMethod.POST, "/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/reviews/product/**").permitAll()
                         //QUALQUER USUARIO LOGADO
                         .requestMatchers(HttpMethod.GET, "/v1/auth/me").authenticated()
-                        // ADMIN -> pode `tudo`
-//                        .requestMatchers(HttpMethod.POST, "/v1/products/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/v1/products/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/v1/products/**").hasRole("ADMIN")
-                        // USER
-                        // ler produtos
-                        //.requestMatchers(HttpMethod.GET, "/v1/products/**").hasAnyRole("USER", "ADMIN", "SELLER")
-                        //carrinho → restrito ao USER
-                        // .requestMatchers("/v1/cart/**").hasRole("USER")
+                        // ADMIN
+                        .requestMatchers("/v1/categories/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/products/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/promotions").hasRole("ADMIN")
+                        .requestMatchers("/v1/reports/sales").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/v1/reviews/product/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/audit/**").hasRole("ADMIN")
+                        // USER -> (CUSTOMER)
+                        .requestMatchers("/v1/cart/**").hasRole("USER")
+                        .requestMatchers("/v1/order/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/v1/reviews").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/v1/coupons/apply").hasRole("USER")
                         // SELLER
-                        //
-                        .anyRequest().authenticated() //qualquer outra chamada precisa ser autenticada
+                        .requestMatchers("/v1/inventory/**").hasAnyRole("SELLER","ADMIN")
+                        .requestMatchers("/v1/reports/low-stock").hasAnyRole("SELLER","ADMIN")
+                        .requestMatchers("/v1/reports/top-products").hasAnyRole("SELLER","ADMIN")
+                        //CHAMADAS DE FORA PRECISAM SER AUTENTICADAS
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
