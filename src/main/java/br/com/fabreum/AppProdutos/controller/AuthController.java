@@ -17,13 +17,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("v1/auth")
+@RequestMapping("/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -41,21 +41,22 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
 
         try {
-            //fazer com que o spring faca a busca de forma automatica
-            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
-            Authentication authenticate = authenticationManager.authenticate(userAndPass);
+            var userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
+            var authenticate = authenticationManager.authenticate(userAndPass);
 
-            User user = (User) authenticate.getPrincipal(); //user autenticado
-            //criar classe para gerar token jwt
+            User user = (User) authenticate.getPrincipal();
+
             String token = tokenService.generateToken(user);
 
             return ResponseEntity.ok(
                     new LoginResponse(
                             user.getId(), user.getName(), user.getEmail(), user.getRole(), token));
-            //return ResponseEntity.ok(new LoginResponse(token));
 
-        } catch (BadCredentialsException exception) {
-            throw new UsernameOrPasswordInvalidException("Usuario ou senha invalida."); //created new class
+        } catch (AuthenticationException exception) {
+            System.out.println("ERRO NO LOGIN: " + exception.getMessage());
+            exception.printStackTrace();
+
+            throw new UsernameOrPasswordInvalidException("Usuário ou senha inválida.");
         }
     }
 
@@ -63,7 +64,7 @@ public class AuthController {
     public ResponseEntity<LoginResponse> me(Authentication authentication) {
 
         JWTUserData user = (JWTUserData) authentication.getPrincipal();
-        // DEVO RETORNAR A SENHA P/ O FRONT? SIM ? NAO ? (deixei como nao)
+
         return ResponseEntity.ok(
                 new LoginResponse(user.id(), user.name(), user.email(), Role.valueOf(user.role()), null));
     }
@@ -87,9 +88,4 @@ public class AuthController {
                 )
         );
     }
-
-
-
-
-
 }
