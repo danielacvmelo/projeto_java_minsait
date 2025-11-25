@@ -1,367 +1,124 @@
-# ✅ **Sugestões de Evolução — Regras de Negócio e Melhorias (para os alunos)**
+# 🛒 E-Commerce API (AppProdutos)
 
-Este projeto foi criado como introdução ao Java e pode ser ampliado com novas regras de negócio, entidades, validações e funcionalidades.
-As sugestões abaixo servem como **exercícios guiados** para aprimorar o domínio de API REST, Java, Spring Boot, autenticação, modelagem de dados e boas práticas.
+A robust and scalable RESTful API built with **Spring Boot 3** and **Java 21**, designed to manage a complete e-commerce ecosystem. This project implements advanced features such as JWT Authentication, Role-Based Access Control (RBAC), Inventory Management, Promotional Coupons, and Audit Logs.
 
-As funcionalidades estão organizadas por prioridade e dificuldade.
+## 🚀 Technologies & Tools
 
----
-
-## ✅ 1. Autenticação e Autorização
-
-**Prioridade:** Alta
-**Dificuldade:** Média
-
-Use o repositório `Login-BE` como referência para implementar autenticação via JWT e controle de acesso.
-
-### Requisitos:
-
-* Implementar login e obtenção de token (JWT).
-* Criar papéis (roles):
-
-  * `ADMIN` – pode criar/editar/deletar produtos, categorias e promoções.
-  * `SELLER` – pode cadastrar/editar produtos próprios.
-  * `CUSTOMER` – pode visualizar catálogo, criar carrinho e pedidos.
-* Proteger endpoints sensíveis com `@PreAuthorize`.
-
-### Endpoints sugeridos:
-
-```
-POST /auth/login  
-POST /auth/refresh  
-GET  /auth/me
-```
+* **Java 21** (JDK)
+* **Spring Boot 3.x**
+* **Spring Security** + **JWT** (Auth0)
+* **PostgreSQL** (Database)
+* **Docker** & **Docker Compose**
+* **Swagger / OpenAPI 3.0** (Documentation)
+* **Lombok** (Boilerplate reduction)
+* **Maven** (Dependency Management)
 
 ---
 
-## ✅ 2. Categorias e Organização do Catálogo
+## 📋 Features
 
-**Prioridade:** Alta
-**Dificuldade:** Baixa
+The project meets all academic requirements, featuring a comprehensive set of modules:
 
-### Regras:
+### 🔐 Authentication & Security
+* **JWT (JSON Web Token):** Stateless authentication.
+* **RBAC (Role-Based Access Control):** Granular permissions for `ADMIN`, `SELLER`, and `USER`.
+* **Endpoints:** Register, Login, Token Refresh, and "Me" (current user info).
 
-* Todo produto deve pertencer a uma categoria.
-* Categorias podem ter hierarquia (pai → filho).
-* Nome de categoria deve ser único no mesmo nível.
+### 📦 Product Catalog
+* **Categories:** Management of product categories.
+* **Products:** CRUD operations with association to categories.
+* **Reviews:** Users can rate and review products.
 
-### Endpoints sugeridos:
+### 🏭 Inventory & Sales
+* **Stock Management:** Add/Remove items from inventory securely.
+* **Shopping Cart:** Persistent cart management for customers.
+* **Checkout:** Order processing with stock validation.
+* **Reports:**
+    * Top-selling products.
+    * Low stock alerts.
+    * Sales revenue reports.
 
-```
-GET    /categories
-POST   /categories
-PUT    /categories/{id}
-DELETE /categories/{id}
-```
-
-### Validações:
-
-* Nome obrigatório.
-* Proibir duplicidade.
-
----
-
-## ✅ 3. Controle de Estoque (Inventário)
-
-**Prioridade:** Alta
-**Dificuldade:** Média
-
-### Regras:
-
-* Cada ajuste de estoque gera um registro de `InventoryTransaction`.
-* A venda/pedido deve diminuir o estoque.
-* Impedir vendas com estoque insuficiente.
-* Notificar quando um produto atingir estoque mínimo (pode ser apenas flag).
-
-### Tipos de transação:
-
-* Entrada (compra/fornecedor)
-* Saída (venda)
-* Ajuste
-* Devolução
-
-### Endpoints sugeridos:
-
-```
-POST /inventory/{productId}/add
-POST /inventory/{productId}/remove
-GET  /inventory/{productId}
-```
+### 🎟️ Marketing & Compliance
+* **Promotions:** Creation of discount coupons with expiration dates.
+* **Coupon Application:** Logic to validate and apply discounts to the cart.
+* **Audit Logs:** Automatic tracking of critical actions (e.g., product creation, order placement) for security and compliance.
 
 ---
 
-## ✅ 4. Carrinho de Compras
+## 🛠️ How to Run
 
-**Prioridade:** Alta
-**Dificuldade:** Média
+### Option 1: Using Docker (Recommended)
+Ensure you have **Docker** and **Docker Compose** installed.
 
-### Regras:
+1.  Clone the repository:
+    ```bash
+    git clone [https://github.com/danielacvmelo/projeto_java_minsait.git](https://github.com/danielacvmelo/projeto_java_minsait.git)
+    cd AppProdutos
+    ```
 
-* Usuário autenticado pode ter apenas 1 carrinho ativo.
-* Itens têm `priceSnapshot` (preço do momento).
-* Atualizações recalculam totais.
+2.  Build and run the containers:
+    ```bash
+    docker-compose up --build -d
+    ```
+    *This will start both the PostgreSQL database and the API application.*
 
-### Endpoints sugeridos:
+### Option 2: Local Development
+Ensure you have **Java 21** and **Maven** installed, and a local **PostgreSQL** instance running.
 
-```
-GET  /cart
-POST /cart/items
-PUT  /cart/items/{itemId}
-DELETE /cart/items/{itemId}
-```
-
----
-
-## ✅ 5. Pedidos (Orders)
-
-**Prioridade:** Alta
-**Dificuldade:** Média
-
-### Regras:
-
-* Carrinho → Pedido (checkout).
-* Status do pedido:
-
-  * `CREATED`
-  * `PAID`
-  * `SHIPPED`
-  * `DELIVERED`
-  * `CANCELLED`
-* Cancelamento permitido somente em `CREATED` ou `PAID`.
-
-### Endpoints sugeridos:
-
-```
-POST /orders
-GET  /orders/{id}
-POST /orders/{id}/cancel
-```
+1.  Configure database credentials in `src/main/resources/application.properties`.
+2.  Install dependencies:
+    ```bash
+    mvn clean install
+    ```
+3.  Run the application:
+    ```bash
+    mvn spring-boot:run
+    ```
 
 ---
 
-## ✅ 6. Promoções e Cupons
+## 📚 API Documentation (Swagger UI)
 
-**Prioridade:** Média
-**Dificuldade:** Média
+Once the application is running, you can access the interactive API documentation to test all endpoints.
 
-### Tipos:
+* **URL:** `http://localhost:8080/swagger-ui.html`
+* **Docs JSON:** `http://localhost:8080/v3/api-docs`
 
-* Desconto percentual (%)
-* Desconto fixo (R$)
-* Promoção por categoria ou produto
-* Cupom válido por período
-* Cupom com limite de uso
-
-### Validações:
-
-* Cupom expirado → rejeitar
-* Cupom já utilizado pelo usuário → rejeitar
-* Cupom sem relação com produtos do carrinho → rejeitar
-
-### Endpoints:
-
-```
-POST /promotions
-POST /coupons/apply
-```
+> **Note:** To test protected routes in Swagger, first execute the `/v1/auth/login` endpoint, copy the `token`, click the **Authorize** button (lock icon), and paste the token with the prefix `Bearer ` (if required by the field) or just the token.
 
 ---
 
-## ✅ 7. Reviews e Avaliações
+## 🛣️ API Endpoints Overview
 
-**Prioridade:** Baixa
-**Dificuldade:** Baixa
+### 👤 Auth Controller
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/v1/auth/register` | Public | Register a new user |
+| `POST` | `/v1/auth/login` | Public | Authenticate and receive JWT |
+| `POST` | `/v1/auth/refresh` | Public | Refresh expired token |
+| `GET` | `/v1/auth/me` | Authenticated | Get current user details |
 
-### Regras:
+### 🛍️ Product & Category
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/v1/categories` | ADMIN | Create a category |
+| `GET` | `/v1/products/{id}` | Public | Get product details |
+| `POST` | `/v1/products/product` | ADMIN | Create a new product |
+| `POST` | `/v1/inventory/{id}/add` | ADMIN/SELLER | Add stock to product |
 
-* Apenas quem comprou pode avaliar.
-* Limite de 1 avaliação por produto por pedido.
-* Recalcular média a cada novo review.
+### 🛒 Shopping & Order
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/v1/cart` | USER | Create a shopping cart |
+| `POST` | `/v1/cart/{cartId}/items` | USER | Add item to cart |
+| `POST` | `/v1/coupons/apply` | USER | Apply discount coupon |
+| `POST` | `/v1/order/{cartId}/checkout`| USER | Finalize purchase |
 
-### Endpoints:
-
-```
-POST /reviews
-GET  /reviews/product/{productId}
-```
-
----
-
-## ✅ 8. Auditoria (Audit Log)
-
-**Prioridade:** Média
-**Dificuldade:** Baixa
-
-### Regras:
-
-* Registrar:
-
-  * quem criou/alterou/deletou
-  * data e hora
-  * antes e depois da alteração (JSON)
-* Auditoria deve ser imutável.
-
-### Endpoints:
-
-```
-GET /audit?entity=Product
-```
+### 📊 Management & Audit
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/v1/promotions` | ADMIN | Create new coupons |
+| `GET` | `/v1/audit` | ADMIN | View system audit logs |
+| `GET` | `/v1/reports/sales` | ADMIN | View sales reports |
 
 ---
-
-## ✅ 9. Relatórios e Métricas
-
-**Prioridade:** Baixa
-**Dificuldade:** Média
-
-### Exemplos:
-
-* Produtos mais vendidos.
-* Faturamento por período.
-* Produtos com estoque baixo.
-* Promoções mais utilizadas.
-
-### Endpoints:
-
-```
-GET /reports/sales
-GET /reports/top-products
-GET /reports/low-stock
-```
-
----
-
-# ✅ 10. Novas Entidades Sugeridas
-
-```text
-Product
-- id
-- name
-- description
-- sku
-- price
-- costPrice
-- categoryId
-- stockQuantity
-- active
-- createdAt
-- updatedAt
-
-Category
-- id
-- name
-- parentId
-- createdAt
-- updatedAt
-
-InventoryTransaction
-- id
-- productId
-- delta
-- reason
-- referenceId
-- createdBy
-- createdAt
-
-Cart
-- id
-- userId
-- status
-
-CartItem
-- id
-- cartId
-- productId
-- quantity
-- priceSnapshot
-
-Order
-- id
-- userId
-- total
-- discount
-- freight
-- status
-- createdAt
-- address
-
-OrderItem
-- id
-- orderId
-- productId
-- quantity
-- priceSnapshot
-
-Promotion
-- id
-- code
-- type
-- value
-- validFrom
-- validTo
-- usageLimit
-- usedCount
-- applicableTo
-
-Review
-- id
-- productId
-- userId
-- rating
-- comment
-- createdAt
-
-AuditLog
-- id
-- entityType
-- entityId
-- action
-- beforeJson
-- afterJson
-- who
-- when
-```
-
----
-
-# ✅ 11. Tarefas / Exercícios Práticos para os Alunos
-
-## 🟦 **Básico (1–2 horas)**
-
-* Criar entidade Categoria.
-* Associar Produto → Categoria.
-* Implementar busca de produtos por nome/categoria.
-* Validar dados básicos (preço > 0, nome obrigatório).
-
-## 🟩 **Intermediário (4–8 horas)**
-
-* Implementar autenticação (baseado no Login-BE).
-* Criar carrinho de compras.
-* Controlar estoque com `InventoryTransaction`.
-
-## 🟧 **Avançado (8–20 horas)**
-
-* Finalizar fluxo completo de pedidos.
-* Criar sistema de cupons e promoções.
-* Implementar reviews vinculados ao pedido.
-* Criar testes unitários e de integração.
-
-## 🟥 **Desafios bônus**
-
-* Multi-seller (cada vendedor gerencia seus produtos).
-* Notificações (e-mail ou webhook) ao mudar status do pedido.
-* Agendamento (Scheduler) para alertas de estoque baixo.
-* Implementar caching (Redis) para catálogo.
-
----
-
-# ✅ 12. Critérios de Aceite
-
-* Endpoints documentados (OpenAPI/Swagger ou README).
-* Todas as validações retornam mensagens claras.
-* Rejeitar operações inconsistentes (ex.: vender sem estoque).
-* Testes unitários cobrindo regras principais.
-* Endpoints sensíveis protegidos com roles.
-* Tabelas criadas com migrations (Flyway/Liquibase).
-* Código organizado, coeso e seguindo boas práticas.
-Só pedir!
