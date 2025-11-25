@@ -5,14 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -23,26 +23,30 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authorizationHeader = request.getHeader("Authorization");
+        String token = recoveryToken(request);
 
-        if (Strings.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
+        if (token != null) {
+            var optionalJWTUserData = tokenService.verifyToken(token);
 
-            String token = authorizationHeader.substring("Bearer ".length()); //token
-
-            Optional<JWTUserData> optionalJWTUserData = tokenService.verifyToken(token);
-
-            //settar quem ta autenticado
             if (optionalJWTUserData.isPresent()) {
                 JWTUserData userData = optionalJWTUserData.get();
-                // opcional *
-                // permite obter informacoes do usuario logado com o 'JWTUserData'
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userData, null, null);
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
-            filterChain.doFilter(request, response); //importante!!! toda a chamada vai dar 200 e nao acontece nada
 
-        } else {
-            filterChain.doFilter(request, response);
+                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + userData.role()));
+
+                var authentication = new UsernamePasswordAuthenticationToken(userData, null, authorities);
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private String recoveryToken(HttpServletRequest request) {
+        var authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        return authHeader.replace("Bearer ", "");
     }
 }
