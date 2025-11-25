@@ -6,6 +6,7 @@ import br.com.fabreum.AppProdutos.repository.AuditLogRepository;
 import br.com.fabreum.AppProdutos.service.dto.AuditLogResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,7 @@ public class AuditController {
     private final AuditLogRepository auditLogRepository;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AuditLogResponseDto>> getAuditLogs(
             @RequestParam(required = false) String entity){
         List<AuditLog> auditLogs;  // lista para armazenar os logs recuperados

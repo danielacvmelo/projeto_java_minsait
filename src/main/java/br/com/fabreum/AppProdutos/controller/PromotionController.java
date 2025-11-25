@@ -28,6 +28,7 @@ public class PromotionController {
     }
 
     @PostMapping("/coupons/apply")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> applyCoupon(@Valid @RequestBody ApplyCouponRequestDto request) {
         try {
             Cart updatedCart = promotionService.applyCoupon(request.cartId(), request.code());
