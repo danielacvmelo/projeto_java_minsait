@@ -15,33 +15,46 @@ A robust and scalable RESTful API built with **Spring Boot 3** and **Java 21**, 
 
 ---
 
-## 📋 Features
+## 📋 Features Implemented
 
-The project meets all academic requirements, featuring a comprehensive set of modules:
+### 1. Authentication & Security (RBAC)
+* Stateless authentication using **JWT**.
+* **Roles:**
+    * `ADMIN`: Full access (manage products, categories, promotions, audit).
+    * `SELLER`: Manage inventory and view reports.
+    * `USER` (Customer): Browse catalog, manage cart, checkout, and review products.
+* Protected endpoints using `@PreAuthorize` and Security Filter chain.
 
-### 🔐 Authentication & Security
-* **JWT (JSON Web Token):** Stateless authentication.
-* **RBAC (Role-Based Access Control):** Granular permissions for `ADMIN`, `SELLER`, and `USER`.
-* **Endpoints:** Register, Login, Token Refresh, and "Me" (current user info).
+### 2. Catalog Management
+* Hierarchical category management.
+* Product CRUD with validation logic.
 
-### 📦 Product Catalog
-* **Categories:** Management of product categories.
-* **Products:** CRUD operations with association to categories.
-* **Reviews:** Users can rate and review products.
+### 3. Inventory Control
+* Transactional stock management.
+* Validation to prevent sales of out-of-stock items.
 
-### 🏭 Inventory & Sales
-* **Stock Management:** Add/Remove items from inventory securely.
-* **Shopping Cart:** Persistent cart management for customers.
-* **Checkout:** Order processing with stock validation.
-* **Reports:**
-    * Top-selling products.
-    * Low stock alerts.
-    * Sales revenue reports.
+### 4. Shopping Cart
+* Persistent cart for authenticated users.
+* Logic to handle item quantity and price snapshots.
 
-### 🎟️ Marketing & Compliance
-* **Promotions:** Creation of discount coupons with expiration dates.
-* **Coupon Application:** Logic to validate and apply discounts to the cart.
-* **Audit Logs:** Automatic tracking of critical actions (e.g., product creation, order placement) for security and compliance.
+### 5. Orders & Checkout
+* Full checkout flow transforming Cart into Order.
+* Order status lifecycle management.
+
+### 6. Promotions & Coupons
+* Creation of discount coupons with expiration logic.
+* Validation and application of coupons to the active cart.
+
+### 7. Reviews
+* Product rating system (1-5 stars) with comments.
+* Linked to specific products and authenticated users.
+
+### 8. Audit System
+* Immutable **Audit Logs** tracking critical actions (Create, Update, Delete).
+* Records *Who*, *When*, and *What* changed.
+
+### 9. Business Reports
+* Endpoints for sales analytics, top-selling products, and low-stock alerts.
 
 ---
 
@@ -88,37 +101,56 @@ Once the application is running, you can access the interactive API documentatio
 
 ---
 
-## 🛣️ API Endpoints Overview
+## 📍 API Endpoints Reference
 
-### 👤 Auth Controller
-| Method | Endpoint | Access | Description |
+### 👤 Authentication
+| Method | Endpoint | Description | Role |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/v1/auth/register` | Public | Register a new user |
-| `POST` | `/v1/auth/login` | Public | Authenticate and receive JWT |
-| `POST` | `/v1/auth/refresh` | Public | Refresh expired token |
-| `GET` | `/v1/auth/me` | Authenticated | Get current user details |
+| `POST` | `/v1/auth/register` | Register new user | Public |
+| `POST` | `/v1/auth/login` | Login & Get Token | Public |
+| `GET` | `/v1/auth/me` | Current user info | Auth |
 
-### 🛍️ Product & Category
-| Method | Endpoint | Access | Description |
+### 📦 Catalog & Products
+| Method | Endpoint | Description | Role |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/v1/categories` | ADMIN | Create a category |
-| `GET` | `/v1/products/{id}` | Public | Get product details |
-| `POST` | `/v1/products/product` | ADMIN | Create a new product |
-| `POST` | `/v1/inventory/{id}/add` | ADMIN/SELLER | Add stock to product |
+| `GET` | `/v1/products` | List products | Public |
+| `GET` | `/v1/products/{id}` | Get product details | Public |
+| `POST` | `/v1/products/product` | Create product | ADMIN |
+| `POST` | `/v1/categories` | Create category | ADMIN |
 
-### 🛒 Shopping & Order
-| Method | Endpoint | Access | Description |
+### 🛒 Shopping & Orders
+| Method | Endpoint | Description | Role |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/v1/cart` | USER | Create a shopping cart |
-| `POST` | `/v1/cart/{cartId}/items` | USER | Add item to cart |
-| `POST` | `/v1/coupons/apply` | USER | Apply discount coupon |
-| `POST` | `/v1/order/{cartId}/checkout`| USER | Finalize purchase |
+| `POST` | `/v1/cart` | Create cart | USER |
+| `POST` | `/v1/cart/{id}/items` | Add item | USER |
+| `POST` | `/v1/coupons/apply` | Apply coupon | USER |
+| `POST` | `/v1/order/{id}/checkout` | Finalize Order | USER |
 
-### 📊 Management & Audit
-| Method | Endpoint | Access | Description |
+### 🏭 Inventory & Reports
+| Method | Endpoint | Description | Role |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/v1/promotions` | ADMIN | Create new coupons |
-| `GET` | `/v1/audit` | ADMIN | View system audit logs |
-| `GET` | `/v1/reports/sales` | ADMIN | View sales reports |
+| `POST` | `/v1/inventory/{id}/add` | Add stock | SELLER/ADMIN |
+| `GET` | `/v1/reports/sales` | Sales Report | ADMIN |
+| `GET` | `/v1/reports/low-stock` | Low Stock Report | SELLER/ADMIN |
+
+### 🛡️ System Audit
+| Method | Endpoint | Description | Role |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/v1/audit` | View audit logs | ADMIN |
+| `POST` | `/v1/promotions` | Create promotion | ADMIN |
+
+---
+
+## 🗄️ Database Schema (Entities)
+
+The project implements the following main entities as requested:
+
+* **Users:** (`id`, `name`, `email`, `password`, `role`)
+* **Products:** (`id`, `name`, `price`, `stockQuantity`, `categoryId`)
+* **Categories:** (`id`, `name`)
+* **Orders:** (`id`, `userId`, `total`, `status`, `createdAt`)
+* **InventoryTransaction:** Tracks stock movement history.
+* **AuditLog:** Records system changes for compliance.
+* **Promotions:** Manages discount codes and validity.
 
 ---
