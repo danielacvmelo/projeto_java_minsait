@@ -35,6 +35,8 @@ public class PromotionService {
         Promotion promotion = findPromotionByCode(code);
 
         validatePromotionIsActive(promotion);
+        validateCartNotEmpty(cart);
+        validateNoExistingPromotion(cart);
 
         User currentUser = getCurrentAuthenticatedUser();
         validateCouponNotUsedByUser(currentUser, promotion);
@@ -64,6 +66,18 @@ public class PromotionService {
     private void validatePromotionIsActive(Promotion promotion) {
         if (!promotion.isValid()) {
             throw new RuntimeException("Cupom expirado ou esgotado");
+        }
+    }
+
+    private void validateCartNotEmpty(Cart cart) {
+        if (cart.getItems().isEmpty()) {
+            throw new RuntimeException("Não é possível aplicar cupom em carrinho vazio");
+        }
+    }
+
+    private void validateNoExistingPromotion(Cart cart) {
+        if (cart.getAppliedPromotion() != null) {
+            throw new RuntimeException("Já existe um cupom aplicado neste carrinho");
         }
     }
 
