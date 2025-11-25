@@ -33,6 +33,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // PERMITE TRATAMENTO DE ERROS
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        // SWAGGER
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
                         // ROTAS PUBLICAS
                         .requestMatchers(HttpMethod.POST, "/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()

@@ -22,3 +22,9 @@ spring:
 appprodutos:
   security:
     secret: "senha-secreta-muito-secreta-bastante-secreta"
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
