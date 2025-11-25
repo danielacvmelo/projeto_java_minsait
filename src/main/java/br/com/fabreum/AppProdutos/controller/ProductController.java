@@ -29,22 +29,18 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("product")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         Product saved = productRepository.save(product);
         return ResponseEntity.ok(saved);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<Product>> listProducts() {
         List<Product> products = productRepository.findAll();
         return ResponseEntity.ok(products);
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Product> listProductById(@PathVariable Long id) {
         Product product = productRepository.findById(id).orElseThrow();
         return ResponseEntity.ok(product);
@@ -56,7 +52,6 @@ public class ProductController {
      * @return
      */
     @GetMapping("/dto/{id}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ProductDto> listProductDtoById(@PathVariable Long id) {
         ProductDto productDto = productRepository.findByIdDto(id);
 
@@ -70,7 +65,6 @@ public class ProductController {
     }
 
     @PutMapping("update")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
 //    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Optional<Product>> updateProduct(@RequestBody Product product) {
         final var existingProduct = productService.updateProduct(product);
@@ -78,7 +72,6 @@ public class ProductController {
     }
 
     @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         //Exemplo construindo Record
         final var p = new ProductDto(1L, "dfs", "sdfa", new BigDecimal("25.6"));

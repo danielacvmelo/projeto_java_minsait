@@ -34,22 +34,23 @@ public class SecurityConfig {
                         // PERMITE TRATAMENTO DE ERROS
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         // SWAGGER
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // ROTAS PUBLICAS
                         .requestMatchers(HttpMethod.POST, "/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/reviews/product/**").permitAll()
-                        //QUALQUER USUARIO LOGADO
+                        // QUALQUER USUARIO LOGADO
                         .requestMatchers(HttpMethod.GET, "/v1/auth/me").authenticated()
+                        // PRODUTOS (configuração específica - fica melhor assim!
+                        .requestMatchers(HttpMethod.GET, "/v1/products/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/v1/products/**").hasAnyRole("ADMIN", "SELLER")
+                        .requestMatchers(HttpMethod.PUT, "/v1/products/**").hasAnyRole("ADMIN", "SELLER")
+                        .requestMatchers(HttpMethod.DELETE, "/v1/products/**").hasRole("ADMIN")
                         // ADMIN
                         .requestMatchers("/v1/categories/**").hasRole("ADMIN")
-                        .requestMatchers("/v1/products/**").hasRole("ADMIN")
                         .requestMatchers("/v1/promotions").hasRole("ADMIN")
                         .requestMatchers("/v1/reports/sales").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/v1/reviews/product/**").hasRole("ADMIN")
                         .requestMatchers("/v1/audit/**").hasRole("ADMIN")
                         // USER -> (CUSTOMER)
                         .requestMatchers("/v1/cart/**").hasRole("USER")
@@ -57,10 +58,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/reviews").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/v1/coupons/apply").hasRole("USER")
                         // SELLER
-                        .requestMatchers("/v1/inventory/**").hasAnyRole("SELLER","ADMIN")
-                        .requestMatchers("/v1/reports/low-stock").hasAnyRole("SELLER","ADMIN")
-                        .requestMatchers("/v1/reports/top-products").hasAnyRole("SELLER","ADMIN")
-                        //CHAMADAS DE FORA PRECISAM SER AUTENTICADAS
+                        .requestMatchers("/v1/inventory/**").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers("/v1/reports/low-stock").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers("/v1/reports/top-products").hasAnyRole("SELLER", "ADMIN")
+                        // QUALQUER OUTRA REQUISIÇÃO PRECISA SER AUTENTICADA
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
