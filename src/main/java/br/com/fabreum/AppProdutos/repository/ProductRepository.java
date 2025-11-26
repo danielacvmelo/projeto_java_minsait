@@ -1,23 +1,23 @@
 package br.com.fabreum.AppProdutos.repository;
 
-import br.com.fabreum.AppProdutos.model.Produtos;
-import br.com.fabreum.AppProdutos.service.dto.ProdutoDto;
+import br.com.fabreum.AppProdutos.model.Product;
+import br.com.fabreum.AppProdutos.service.dto.ProductDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProdutosRepository extends JpaRepository<Produtos, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
 
     //Projection
     @Query(nativeQuery = true, value = """
             SELECT p.id, 
-            p.codigo_barras AS codigoBarras, 
-            p.nome, 
-            p.preco
-            FROM tb_produtos p 
+            p.barcode AS barcode, 
+            p.name AS name, 
+            p.price AS price
+            FROM tb_products p 
             WHERE p.id = :id
             """)
-    ProdutoDto findByIdDto(long id);
+    ProductDto findByIdDto(long id);
 }
 

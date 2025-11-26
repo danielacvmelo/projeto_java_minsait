@@ -1,35 +1,35 @@
 package br.com.fabreum.AppProdutos.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "tb_categories")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "tb_estoque")
-public class Estoque {
+@AllArgsConstructor
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Integer quantidade;
-
-    @OneToOne
-    @JoinColumn(name = "produto_id", referencedColumnName = "id")
-    private Produtos produto;
-
+    @Column(nullable = false, unique = true)
+    private String name;
+    @OneToMany(mappedBy = "category")
+    @JsonIgnore
+    private Set<Product> produtos = new HashSet<>();
 }
