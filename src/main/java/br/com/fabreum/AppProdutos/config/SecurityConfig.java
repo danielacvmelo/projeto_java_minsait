@@ -40,13 +40,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/reviews/product/**").permitAll()
+                        // ROTAS PUBLICAS PARA O E-COMMERCE
+                        .requestMatchers("v1/products/**").permitAll()
                         // QUALQUER USUARIO LOGADO
                         .requestMatchers(HttpMethod.GET, "/v1/auth/me").authenticated()
                         // PRODUTOS (configuração específica - fica melhor assim!
-                        .requestMatchers(HttpMethod.GET, "/v1/products/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/v1/products/**").hasAnyRole("ADMIN", "SELLER")
-                        .requestMatchers(HttpMethod.PUT, "/v1/products/**").hasAnyRole("ADMIN", "SELLER")
-                        .requestMatchers(HttpMethod.DELETE, "/v1/products/**").hasRole("ADMIN")
+//                        .requestMatchers(HttpMethod.GET, "/v1/products/**").hasAnyRole("USER", "ADMIN")
+//                        .requestMatchers(HttpMethod.POST, "/v1/products/**").hasAnyRole("ADMIN", "SELLER")
+//                        .requestMatchers(HttpMethod.PUT, "/v1/products/**").hasAnyRole("ADMIN", "SELLER")
+//                        .requestMatchers(HttpMethod.DELETE, "/v1/products/**").hasRole("ADMIN")
                         // ADMIN
                         .requestMatchers("/v1/categories/**").hasRole("ADMIN")
                         .requestMatchers("/v1/promotions").hasRole("ADMIN")
